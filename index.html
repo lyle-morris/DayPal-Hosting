@@ -17,12 +17,11 @@
     }
 
     * { box-sizing: border-box; }
-
     html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
 
     body {
       margin: 0;
-      padding: 14px;
+      padding: 14px 14px 86px;
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -43,20 +42,20 @@
 
     .section-title { margin: 0 0 4px; font-size: 18px; font-weight: 800; }
     .section-copy { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
-    .subsection-title { margin: 18px 0 8px; color: var(--text); font-size: 14px; font-weight: 700; }
 
     .theme-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 8px;
       width: 100%;
     }
 
     .theme-tile {
+      position: relative;
       width: 100%;
       min-width: 0;
       min-height: 48px;
-      border: 2px solid transparent;
+      border: 0;
       border-radius: var(--radius);
       display: flex;
       align-items: center;
@@ -71,7 +70,19 @@
       overflow-wrap: anywhere;
     }
 
-    .theme-tile.selected { border-color: var(--accent); }
+    .theme-tile.selected::after {
+      content: '✓';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 170, 255, 0.88);
+      color: #ffffff;
+      border-radius: var(--radius);
+      font-size: 24px;
+      font-weight: 900;
+    }
 
     .toggle-row {
       display: flex;
@@ -122,17 +133,21 @@
     }
 
     .actions {
-      position: sticky;
+      position: fixed;
+      left: 0;
+      right: 0;
       bottom: 0;
-      padding-top: 12px;
-      background: linear-gradient(transparent, var(--bg) 30%);
+      z-index: 10;
+      padding: 10px 14px 14px;
+      background: var(--bg);
+      box-shadow: 0 -8px 18px rgba(0, 0, 0, 0.35);
     }
 
     #status {
-      min-height: 22px;
-      margin: 0 0 8px;
+      min-height: 18px;
+      margin: 0 0 6px;
       color: var(--success);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       text-align: center;
     }
@@ -150,9 +165,9 @@
     }
 
     @media (max-width: 330px) {
-      body { padding: 12px; }
+      body { padding: 12px 12px 84px; }
       .section { padding: 14px; }
-      .theme-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .theme-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .slot-row { grid-template-columns: 56px minmax(0, 1fr); gap: 10px; }
       .theme-tile, select, #save, .secondary-button { font-size: 15px; }
     }
@@ -160,14 +175,12 @@
 </head>
 <body>
   <h1>DayPal</h1>
-  <p class="subtitle">Use the below settings to help customize your watchface.</p>
+  <p class="subtitle">Use the below settings to help customized your watchface.</p>
 
   <div class="section">
     <p class="section-title">Themes</p>
     <p class="section-copy">Select a color theme for your watchface.</p>
-    <div class="theme-grid" id="whiteTextThemes"></div>
-    <p class="subsection-title">Black text on color</p>
-    <div class="theme-grid" id="blackTextThemes"></div>
+    <div class="theme-grid" id="themeTiles"></div>
   </div>
 
   <div class="section">
@@ -213,17 +226,16 @@
     ];
 
     var THEMES = [
-      { value: 0, label: 'Default', bg: '#000000', color: '#ffffff', group: 'white' },
-      { value: 1, label: 'Blue', bg: '#2F6BCC', color: '#000000', group: 'white' },
-      { value: 5, label: 'Orange', bg: '#E66E6B', color: '#000000', group: 'white' },
-      { value: 3, label: 'Green', bg: '#5E9860', color: '#000000', group: 'white' },
-      { value: 2, label: 'Pink', bg: '#E16AA3', color: '#000000', group: 'white' },
-      { value: 8, label: 'Red', bg: '#E35462', color: '#000000', group: 'white' },
-      { value: 9, label: 'Khaki', bg: '#AEA382', color: '#ffffff', group: 'white' },
-      { value: 7, label: 'Black', bg: '#000000', color: '#ffffff', group: 'white' },
-      { value: 4, label: 'White', bg: '#FFFFFF', color: '#000000', group: 'black' },
-      { value: 10, label: 'Khaki', bg: '#AEA382', color: '#000000', group: 'black' },
-      { value: 11, label: 'Gray', bg: '#AAAAAA', color: '#000000', group: 'black' }
+      { value: 0, label: 'Default', bg: '#000000', color: '#ffffff' },
+      { value: 1, label: 'Blue', bg: '#0055FF', color: '#000000' },
+      { value: 5, label: 'Orange', bg: '#FF5500', color: '#000000' },
+      { value: 3, label: 'Green', bg: '#00AA55', color: '#000000' },
+      { value: 2, label: 'Pink', bg: '#FF00AA', color: '#000000' },
+      { value: 8, label: 'Red', bg: '#FF0055', color: '#000000' },
+      { value: 9, label: 'Yellow', bg: '#FFCC55', color: '#000000' },
+      { value: 7, label: 'Black', bg: '#000000', color: '#ffffff' },
+      { value: 4, label: 'White', bg: '#FFFFFF', color: '#000000' },
+      { value: 11, label: 'Gray', bg: '#AAAAAA', color: '#000000' }
     ];
 
     function mergeSettings(base, saved) {
@@ -238,7 +250,9 @@
       var match = window.location.search.match(/[?&]settings=([^&]+)/);
       if (!match) return DEFAULT_SETTINGS;
       try {
-        return mergeSettings(DEFAULT_SETTINGS, JSON.parse(decodeURIComponent(match[1])));
+        var parsed = JSON.parse(decodeURIComponent(match[1]));
+        if (Number(parsed.theme) === 10) parsed.theme = 9;
+        return mergeSettings(DEFAULT_SETTINGS, parsed);
       } catch (e) {
         return DEFAULT_SETTINGS;
       }
@@ -256,10 +270,8 @@
     }
 
     function renderThemeTiles(settings) {
-      var white = document.getElementById('whiteTextThemes');
-      var black = document.getElementById('blackTextThemes');
-      white.innerHTML = '';
-      black.innerHTML = '';
+      var container = document.getElementById('themeTiles');
+      container.innerHTML = '';
       for (var i = 0; i < THEMES.length; i++) {
         var theme = THEMES[i];
         var tile = document.createElement('button');
@@ -273,14 +285,13 @@
           settings.theme = Number(this.getAttribute('data-theme'));
           renderThemeTiles(settings);
         };
-        if (theme.group === 'black') black.appendChild(tile);
-        else white.appendChild(tile);
+        container.appendChild(tile);
       }
     }
 
     function readSettingsFromForm() {
       return {
-        theme: Number(settings.theme),
+        theme: Number(settings.theme) === 10 ? 9 : Number(settings.theme),
         slot_1_metric: Number(document.getElementById('slot_1_metric').value),
         slot_2_metric: Number(document.getElementById('slot_2_metric').value),
         slot_3_metric: Number(document.getElementById('slot_3_metric').value),
