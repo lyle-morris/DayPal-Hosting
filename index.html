@@ -7,12 +7,13 @@
   <style>
     :root {
       --bg: #111111;
-      --card: #1f1f1f;
+      --section: rgba(255, 255, 255, 0.25);
       --text: #ffffff;
-      --muted: #b8b8b8;
-      --border: #333333;
-      --accent: #00aaff;
+      --muted: #d8d8d8;
+      --field: #000000;
+      --accent: #00AAFF;
       --success: #00ff88;
+      --radius: 4px;
     }
 
     * { box-sizing: border-box; }
@@ -29,65 +30,92 @@
     h1 { margin: 0 0 4px; font-size: 28px; font-weight: 800; }
     .subtitle { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
+    .section {
+      background: var(--section);
+      border-radius: var(--radius);
       padding: 16px;
       margin-bottom: 16px;
     }
 
-    .section-title { margin: 0 0 12px; font-size: 16px; font-weight: 700; }
+    .section-title { margin: 0 0 4px; font-size: 18px; font-weight: 800; }
+    .section-copy { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+    .subsection-title { margin: 18px 0 8px; color: var(--text); font-size: 14px; font-weight: 700; }
 
-    label {
-      display: block;
-      margin: 14px 0 6px;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
     }
 
-    select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: #0f0f0f;
-      color: var(--text);
+    .theme-tile {
+      min-height: 48px;
+      border: 2px solid transparent;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
       font-size: 16px;
+      font-weight: 800;
+      text-align: center;
+      cursor: pointer;
     }
+
+    .theme-tile.selected { border-color: var(--accent); }
 
     .toggle-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-top: 12px;
     }
 
     .toggle-copy { color: var(--muted); font-size: 14px; }
+    input[type="checkbox"] { width: 32px; height: 32px; accent-color: var(--accent); }
 
-    input[type="checkbox"] { width: 24px; height: 24px; accent-color: var(--accent); }
-
-    .preview {
+    .slot-row {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-top: 12px;
+      grid-template-columns: 64px 1fr;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
     }
 
-    .swatch {
-      min-height: 52px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
+    .slot-row label { font-size: 14px; font-weight: 800; }
+
+    select {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: var(--radius);
+      background: var(--field);
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .secondary-button {
+      width: auto;
+      min-width: 132px;
+      height: 48px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.35);
+      color: var(--text);
+      font-size: 16px;
       font-weight: 800;
-      text-align: center;
+      cursor: pointer;
+      float: right;
+    }
+
+    .actions {
+      position: sticky;
+      bottom: 0;
+      padding-top: 12px;
+      background: linear-gradient(transparent, var(--bg) 30%);
+      clear: both;
     }
 
     #status {
@@ -99,21 +127,14 @@
       text-align: center;
     }
 
-    .actions {
-      position: sticky;
-      bottom: 0;
-      padding-top: 12px;
-      background: linear-gradient(transparent, var(--bg) 30%);
-    }
-
-    button {
+    #save {
       width: 100%;
-      padding: 14px 16px;
+      height: 48px;
       border: 0;
-      border-radius: 12px;
+      border-radius: var(--radius);
       background: var(--accent);
-      color: #001018;
-      font-size: 17px;
+      color: #ffffff;
+      font-size: 16px;
       font-weight: 800;
       cursor: pointer;
     }
@@ -121,60 +142,37 @@
 </head>
 <body>
   <h1>DayPal</h1>
-  <p class="subtitle">Choose a glanceable look for your Pebble Time 2 watchface.</p>
+  <p class="subtitle">Use the below settings to help customize your watchface.</p>
 
-  <div class="card">
-    <p class="section-title">Theme</p>
-    <label for="theme">Color theme</label>
-    <select id="theme">
-      <option value="0">Default — colorful metrics</option>
-      <option value="1">Blue</option>
-      <option value="2">Pink</option>
-      <option value="3">Green</option>
-      <option value="4">White</option>
-      <option value="5">Orange</option>
-      <option value="6">Dark Blue</option>
-      <option value="7">Black</option>
-    </select>
-
-    <div class="preview">
-      <div class="swatch" style="background:#000;color:#fff">Default</div>
-      <div class="swatch" style="background:#0055ff;color:#fff">Blue</div>
-      <div class="swatch" style="background:#ff00aa;color:#fff">Pink</div>
-      <div class="swatch" style="background:#00aa55;color:#fff">Green</div>
-      <div class="swatch" style="background:#fff;color:#000">White</div>
-      <div class="swatch" style="background:#ff5500;color:#fff">Orange</div>
-      <div class="swatch" style="background:#001a55;color:#fff">Dark Blue</div>
-      <div class="swatch" style="background:#000;color:#fff">Black</div>
-    </div>
+  <div class="section">
+    <p class="section-title">Themes</p>
+    <p class="section-copy">Select a color theme for your watchface.</p>
+    <div class="theme-grid" id="whiteTextThemes"></div>
+    <p class="subsection-title">Black text on color</p>
+    <div class="theme-grid" id="blackTextThemes"></div>
   </div>
 
-  <div class="card">
-    <p class="section-title">Clock</p>
+  <div class="section">
+    <p class="section-title">Clock settings</p>
     <div class="toggle-row">
-      <div>
-        <strong>Leading zero</strong>
-        <div class="toggle-copy">Show times like 08 instead of 8.</div>
-      </div>
+      <div class="toggle-copy">Display leading zero on the hours.</div>
       <input id="show_leading_zero" type="checkbox">
     </div>
   </div>
 
-  <div class="card">
+  <div class="section">
     <p class="section-title">Metric slots</p>
-    <label for="slot_1_metric">Slot 1</label>
-    <select id="slot_1_metric"></select>
-    <label for="slot_2_metric">Slot 2</label>
-    <select id="slot_2_metric"></select>
-    <label for="slot_3_metric">Slot 3</label>
-    <select id="slot_3_metric"></select>
-    <label for="slot_4_metric">Slot 4</label>
-    <select id="slot_4_metric"></select>
+    <p class="section-copy">Customize which metric goes in which slot on the watchface.</p>
+    <div class="slot-row"><label for="slot_1_metric">Slot 1</label><select id="slot_1_metric"></select></div>
+    <div class="slot-row"><label for="slot_2_metric">Slot 2</label><select id="slot_2_metric"></select></div>
+    <div class="slot-row"><label for="slot_3_metric">Slot 3</label><select id="slot_3_metric"></select></div>
+    <div class="slot-row"><label for="slot_4_metric">Slot 4</label><select id="slot_4_metric"></select></div>
+    <button id="reset_layout" class="secondary-button" type="button">Reset layout</button>
   </div>
 
   <div class="actions">
     <div id="status"></div>
-    <button id="save" type="button">Save Settings</button>
+    <button id="save" type="button">Save settings</button>
   </div>
 
   <script>
@@ -189,11 +187,25 @@
 
     var METRICS = [
       { value: 0, label: 'Weather' },
-      { value: 1, label: 'Heart Rate' },
+      { value: 1, label: 'Heart rate' },
       { value: 2, label: 'Battery' },
       { value: 3, label: 'Calories' },
       { value: 4, label: 'Steps' },
       { value: 5, label: 'None' }
+    ];
+
+    var THEMES = [
+      { value: 0, label: 'Default', bg: '#000000', color: '#ffffff', group: 'white' },
+      { value: 1, label: 'Blue', bg: '#2F6BCC', color: '#ffffff', group: 'white' },
+      { value: 5, label: 'Orange', bg: '#E66E6B', color: '#ffffff', group: 'white' },
+      { value: 3, label: 'Green', bg: '#5E9860', color: '#ffffff', group: 'white' },
+      { value: 2, label: 'Pink', bg: '#E16AA3', color: '#ffffff', group: 'white' },
+      { value: 8, label: 'Red', bg: '#E35462', color: '#ffffff', group: 'white' },
+      { value: 9, label: 'Khaki', bg: '#AEA382', color: '#ffffff', group: 'white' },
+      { value: 7, label: 'Black', bg: '#000000', color: '#ffffff', group: 'white' },
+      { value: 4, label: 'White', bg: '#FFFFFF', color: '#000000', group: 'black' },
+      { value: 10, label: 'Khaki', bg: '#AEA382', color: '#000000', group: 'black' },
+      { value: 11, label: 'Gray', bg: '#AAAAAA', color: '#000000', group: 'black' }
     ];
 
     function mergeSettings(base, saved) {
@@ -225,15 +237,45 @@
       }
     }
 
+    function renderThemeTiles(settings) {
+      var white = document.getElementById('whiteTextThemes');
+      var black = document.getElementById('blackTextThemes');
+      white.innerHTML = '';
+      black.innerHTML = '';
+      for (var i = 0; i < THEMES.length; i++) {
+        var theme = THEMES[i];
+        var tile = document.createElement('button');
+        tile.type = 'button';
+        tile.className = 'theme-tile' + (Number(settings.theme) === theme.value ? ' selected' : '');
+        tile.textContent = theme.label;
+        tile.style.background = theme.bg;
+        tile.style.color = theme.color;
+        tile.setAttribute('data-theme', theme.value);
+        tile.onclick = function() {
+          settings.theme = Number(this.getAttribute('data-theme'));
+          renderThemeTiles(settings);
+        };
+        if (theme.group === 'black') black.appendChild(tile);
+        else white.appendChild(tile);
+      }
+    }
+
     function readSettingsFromForm() {
       return {
-        theme: Number(document.getElementById('theme').value),
+        theme: Number(settings.theme),
         slot_1_metric: Number(document.getElementById('slot_1_metric').value),
         slot_2_metric: Number(document.getElementById('slot_2_metric').value),
         slot_3_metric: Number(document.getElementById('slot_3_metric').value),
         slot_4_metric: Number(document.getElementById('slot_4_metric').value),
         show_leading_zero: document.getElementById('show_leading_zero').checked
       };
+    }
+
+    function resetLayout() {
+      document.getElementById('slot_1_metric').value = 0;
+      document.getElementById('slot_2_metric').value = 1;
+      document.getElementById('slot_3_metric').value = 2;
+      document.getElementById('slot_4_metric').value = 4;
     }
 
     function saveAndClose() {
@@ -247,17 +289,11 @@
       button.textContent = 'Saving…';
       button.disabled = true;
 
-      setTimeout(function() {
-        window.location.href = closeUrl;
-      }, 50);
-
-      setTimeout(function() {
-        document.location = closeUrl;
-      }, 150);
-
+      setTimeout(function() { window.location.href = closeUrl; }, 50);
+      setTimeout(function() { document.location = closeUrl; }, 150);
       setTimeout(function() {
         status.textContent = 'Saved. If this window stays open in CloudPebble, close it and rerun the emulator.';
-        button.textContent = 'Save Settings';
+        button.textContent = 'Save settings';
         button.disabled = false;
       }, 800);
     }
@@ -268,13 +304,13 @@
     populateMetricSelect('slot_4_metric');
 
     var settings = getQuerySettings();
-    document.getElementById('theme').value = Number(settings.theme);
+    renderThemeTiles(settings);
     document.getElementById('slot_1_metric').value = Number(settings.slot_1_metric);
     document.getElementById('slot_2_metric').value = Number(settings.slot_2_metric);
     document.getElementById('slot_3_metric').value = Number(settings.slot_3_metric);
     document.getElementById('slot_4_metric').value = Number(settings.slot_4_metric);
     document.getElementById('show_leading_zero').checked = !!settings.show_leading_zero;
-
+    document.getElementById('reset_layout').onclick = resetLayout;
     document.getElementById('save').onclick = saveAndClose;
   </script>
 </body>
