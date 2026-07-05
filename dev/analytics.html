@@ -2,35 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DayPal Analytics</title>
-<style>
-:root{--bg:#000;--surface:#1d1d1d;--card:#101010;--text:#fff;--muted:#bdbdbd;--border:#444;--accent:#00aaff;--ok:#00ff88;--warn:#ffcc55;--bad:#ff6655}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 Arial,sans-serif}.page{width:min(100%,980px);margin:auto;padding:16px}.banner{background:var(--accent);color:#000;font-weight:900;padding:8px 10px;margin-bottom:12px}h1{font-size:30px;margin:0 0 4px}.muted{color:var(--muted)}.card{background:var(--surface);border:1px solid var(--border);padding:14px;margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.metric{background:var(--card);border:1px solid var(--border);padding:12px}.metric b{display:block;font-size:28px;margin-bottom:2px}.metric span{color:var(--muted);font-size:12px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}button{border:0;background:var(--accent);color:#000;min-height:36px;padding:0 12px;font-weight:800;cursor:pointer}input{min-height:36px;background:#050505;color:#fff;border:1px solid #555;padding:0 10px;min-width:280px}.table-wrap{overflow:auto;border:1px solid var(--border)}table{width:100%;border-collapse:collapse;min-width:520px}th,td{border-bottom:1px solid #333;text-align:left;padding:8px}th{background:#080808}.warn{border-left:4px solid var(--warn);background:#171200}.small{font-size:12px}a{color:#8fdcff}</style>
+<style>body{margin:0;background:#000;color:#fff;font:16px Arial,sans-serif;padding:24px}.card{max-width:640px;margin:auto;background:#1d1d1d;border:1px solid #444;padding:18px}.banner{background:#00aaff;color:#000;font-weight:900;padding:8px 10px;margin-bottom:12px}a{color:#8fdcff;font-weight:800}.muted{color:#bdbdbd}</style>
 </head>
 <body>
-<main class="page">
+<div class="card">
 <div class="banner">DEV ANALYTICS — DayPal 1.6.0</div>
 <h1>DayPal Analytics</h1>
-<p class="muted">Product-focused dashboard powered by GA4 through the DayPal Cloud Run analytics API.</p>
-<section class="card warn" id="setup"><b>API setup required</b><p>Deploy the Cloud Run API, then paste its service URL below. The URL is saved only in this browser.</p><div class="row"><input id="apiUrl" placeholder="https://daypal-analytics-api-...run.app"><button id="saveApi">Save API URL</button></div></section>
-<section class="card"><div class="row"><button id="refresh">Refresh</button><span class="muted small" id="status">Not loaded.</span></div></section>
-<section class="card"><h2>Summary</h2><div class="grid" id="summary"></div></section>
-<section class="card"><h2>Events</h2><div id="events"></div></section>
-<section class="card"><h2>Countries</h2><div id="countries"></div></section>
-<section class="card"><h2>Pages</h2><div id="pages"></div></section>
-<section class="card"><h2>Daily trend</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Active users</th><th>Page views</th><th>Events</th></tr></thead><tbody id="daily"></tbody></table></div></section>
-<section class="card"><h2>Privacy model</h2><p class="muted">This dashboard uses aggregate GA4 data only. DayPal does not send ZIP/postal code, city, GPS coordinates, heart-rate data, battery percentage, weather values, or personal information.</p></section>
-</main>
-<script>
-const API_KEY='daypal_analytics_api_url';
-function $(id){return document.getElementById(id)}
-function fmt(n){return Number(n||0).toLocaleString()}
-function apiBase(){return (localStorage.getItem(API_KEY)||'').replace(/\/$/,'')}
-function setStatus(msg){$('status').textContent=msg}
-function table(rows,cols){return '<div class="table-wrap"><table><thead><tr>'+cols.map(c=>'<th>'+c.label+'</th>').join('')+'</tr></thead><tbody>'+((rows||[]).map(r=>'<tr>'+cols.map(c=>'<td>'+c.value(r)+'</td>').join('')+'</tr>').join('')||'<tr><td colspan="'+cols.length+'" class="muted">No data yet.</td></tr>')+'</tbody></table></div>'}
-function render(data){let s=data.summary||{};$('summary').innerHTML=[['Active users',s.active_users],['New users',s.new_users],['Returning estimate',s.returning_users_estimate],['Sessions',s.sessions],['Page views',s.page_views],['Events',s.event_count]].map(m=>'<div class="metric"><b>'+fmt(m[1])+'</b><span>'+m[0]+'</span></div>').join('');$('events').innerHTML=table(data.events,[{label:'Event',value:r=>r.name},{label:'Count',value:r=>fmt(r.count)}]);$('countries').innerHTML=table(data.countries,[{label:'Country',value:r=>r.country},{label:'Active users',value:r=>fmt(r.active_users)}]);$('pages').innerHTML=table(data.pages,[{label:'Path',value:r=>r.path},{label:'Views',value:r=>fmt(r.views)}]);$('daily').innerHTML=(data.daily||[]).map(r=>'<tr><td>'+r.date+'</td><td>'+fmt(r.active_users)+'</td><td>'+fmt(r.page_views)+'</td><td>'+fmt(r.event_count)+'</td></tr>').join('')||'<tr><td colspan="4" class="muted">No trend data yet.</td></tr>';$('setup').style.display='none';setStatus('Loaded '+(data.cached?'from cache':'fresh')+' at '+new Date(data.generated_at||Date.now()).toLocaleString())}
-async function load(){let base=apiBase();$('apiUrl').value=base;if(!base){setStatus('Paste the Cloud Run API URL to connect the dashboard.');return}setStatus('Loading...');try{let res=await fetch(base+'/api/daypal-analytics',{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);render(await res.json())}catch(e){setStatus('Unable to load analytics: '+e.message)}}
-$('saveApi').onclick=()=>{localStorage.setItem(API_KEY,$('apiUrl').value.trim());load()};$('refresh').onclick=load;load();
-</script>
+<p>DayPal analytics are tracked in Google Analytics 4.</p>
+<p class="muted">The custom DayPal dashboard and Cloud Run API are shelved for now to keep the release simple and avoid extra infrastructure.</p>
+<p>Use GA4 directly for users, page views, countries, devices, and DayPal events such as <code>settings_saved</code>, <code>layout_reset</code>, and <code>donation_clicked</code>.</p>
+</div>
 </body>
 </html>
